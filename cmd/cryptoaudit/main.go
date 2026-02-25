@@ -57,7 +57,7 @@ Examples:
   cryptoaudit scan ./myproject
   cryptoaudit scan /etc/ssl
   cryptoaudit check config.yaml
-`, "cryptoaudit")
+`,)
 }
 
 func scanTarget(target string) {

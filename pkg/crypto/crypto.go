@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"hash"
 	"regexp"
+	"strings"
 )
 
 // WeakAlgorithm represents a weak cryptographic algorithm.
@@ -127,11 +128,11 @@ func NewScanner() *Scanner {
 
 // AnalyzeAlgorithm analyzes a cryptographic algorithm.
 func (s *Scanner) AnalyzeAlgorithm(algorithm string) *WeakAlgorithm {
-	algLower := regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(algorithm, "")
+	algLower := regexp.MustCompile(`[^a-zA-Z0-9]+`).ReplaceAllString(algorithm, "")
 	algLower = regexp.MustCompile(`-|\s`).ReplaceAllString(algLower, "")
 
 	for name, weak := range s.weakAlgorithms {
-		weakName := regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(name, "")
+		weakName := regexp.MustCompile(`[^a-zA-Z0-9]+`).ReplaceAllString(name, "")
 		if algLower == weakName || algLower == name {
 			return &weak
 		}
@@ -141,14 +142,14 @@ func (s *Scanner) AnalyzeAlgorithm(algorithm string) *WeakAlgorithm {
 
 // AnalyzeKeyStrength analyzes key strength.
 func AnalyzeKeyStrength(keyType string, keySize int) KeyStrength {
-	keyType = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(keyType, "")
-	keyTypeLower := regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(keyType, "")
+	keyType = regexp.MustCompile(`[^a-zA-Z0-9]+`).ReplaceAllString(keyType, "")
+keyTypeLower := strings.ToLower(regexp.MustCompile(`[^a-zA-Z0-9]+`).ReplaceAllString(keyType, ""))
 
 	var strength string
 	var recommendation string
 
 	switch keyTypeLower {
-	case "aes", "aes-128", "aes128":
+	case "aes", "aes128", "aes256":
 		if keySize >= 256 {
 			strength = "strong"
 			recommendation = "Excellent key strength"
@@ -159,9 +160,6 @@ func AnalyzeKeyStrength(keyType string, keySize int) KeyStrength {
 			strength = "weak"
 			recommendation = "Increase key size to at least 128 bits"
 		}
-	case "aes-256", "aes256":
-		strength = "strong"
-		recommendation = "Excellent key strength"
 	case "rsa":
 		if keySize >= 4096 {
 			strength = "strong"
@@ -226,7 +224,7 @@ func (s *Scanner) ScanContent(content string) []ConfigIssue {
 // AnalyzeHash analyzes a hash value.
 func AnalyzeHash(hashValue string) HashAnalysis {
 	hashValue = regexp.MustCompile(`[^a-f0-9]+`).ReplaceAllString(hashValue, "")
-	hashValue = regexp.ToLower(hashValue)
+	hashValue = strings.ToLower(hashValue)
 
 	analysis := HashAnalysis{
 		Algorithm: "unknown",
